@@ -471,7 +471,7 @@ class baseRunner:
             for metric_type, val in self.after_pruning_metrics.items():
                 wandb.run.summary[f"pruned.{metric_type}"] = val
 
-        # Add to existing self.ultimate_log_dict which was not commited yet
+        # Add to existing self.ultimate_log_dict which was not committed yet
         if self.ultimate_log_dict is not None:
             if loggingDict['train']['accuracy'] == 0:
                 # we did not perform the recomputation, use the old values for train

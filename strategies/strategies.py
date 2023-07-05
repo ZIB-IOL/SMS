@@ -73,7 +73,6 @@ class Dense:
         pass
 
     def final(self):
-        # self.make_pruning_permant()
         pass
 
     @torch.no_grad()
@@ -125,7 +124,7 @@ class Dense:
 
     def enforce_prunedness(self):
         """
-        Makes the pruning permant, i.e. set the pruned weights to zero, than reinitialize from the same mask
+        Makes the pruning permanent, i.e. set the pruned weights to zero, than reinitialize from the same mask
         This ensures that we can actually work (i.e. LMO, rescale computation) with the parameters
         Important: For this to work we require that pruned weights stay zero in weight_orig over training
         hence training, projecting etc should not modify (pruned) 0 weights in weight_orig

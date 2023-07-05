@@ -52,5 +52,3 @@ class ChainedSchedulers(torch.optim.lr_scheduler.ChainedScheduler):
     def __init__(self, **kwargs):
         self.optimizer = kwargs['schedulers'][0].optimizer
         super(ChainedSchedulers, self).__init__(**kwargs)
-
-

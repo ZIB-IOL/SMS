@@ -15,19 +15,13 @@ from typing import List
 
 import numpy as np
 import torch
-import torch.nn.utils.prune as prune
 import wandb
-from torch import nn
 from torch.cuda.amp import autocast
-from torch.nn.utils import parametrize
-from torchmetrics import MeanMetric
 from torchmetrics.classification import MulticlassAccuracy as Accuracy
 from tqdm.auto import tqdm
 
 from runners.baseRunner import baseRunner
-from runners.pretrainedRunner import pretrainedRunner
 from strategies import ensembleStrategies
-from utilities.lr_schedulers import SequentialSchedulers
 from utilities.utilities import Utilities as Utils, WorstClassAccuracy, CalibrationError, Candidate
 
 

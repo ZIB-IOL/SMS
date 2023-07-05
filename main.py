@@ -29,7 +29,7 @@ defaults = dict(
     arch=None,
     n_epochs=None,
     batch_size=None,
-    # Effiency
+    # Efficiency
     use_amp=True,
     # Optimizer
     optimizer=None,
@@ -70,7 +70,7 @@ if '--debug' in sys.argv:
         arch='Simple',
         n_epochs=2,
         batch_size=1028,
-        # Effiency
+        # Efficiency
         use_amp=True,
         # Optimizer
         optimizer='SGD',

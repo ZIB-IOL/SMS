@@ -7,8 +7,6 @@
 
 import torchvision
 
-from utilities.utilities import Utilities as Utils
-
 
 def ResNet50():
     return torchvision.models.resnet50(pretrained=False)
