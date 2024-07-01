@@ -26,7 +26,6 @@ class pretrainedRunner(baseRunner):
     def find_existing_model(self, filterDict):
         """Finds an existing wandb run and downloads the model file."""
         phase_before_current = self.config.phase - 1
-        sys.stdout.write(f"Structured pruning: {self.config.prune_structured}.\n")
         if phase_before_current > 0:
             # We specify the phase in the filterDict, because we want to find the model that was trained in the previous phase
             filterDict['$and'].append({'config.phase': phase_before_current})
@@ -45,7 +44,6 @@ class pretrainedRunner(baseRunner):
             if self.config.ensemble_method not in [None, 'None', 'none']:
                 filterDict['$and'].append({'config.strategy': 'Ensemble'})
                 filterDict['$and'].append({'config.ensemble_method': self.config.ensemble_method})
-                filterDict['$and'].append({'config.prune_structured': self.config.prune_structured})
 
                 # We now also need to filter for n_splits_total since otherwise we use different settings
                 sys.stdout.write(f"Looking for n_splits_total {self.config.n_splits_total}.\n")
@@ -56,7 +54,6 @@ class pretrainedRunner(baseRunner):
                 sys.stdout.write("Looking for last retrained model.\n")
                 filterDict['$and'].append({'config.strategy': 'IMP'})
                 filterDict['$and'].append({'config.split_val': self.config.split_val})
-                filterDict['$and'].append({'config.prune_structured': self.config.prune_structured})
         else:
             assert self.config.n_splits_total is not None
             filterDict['$and'].append({'config.strategy': 'Dense'})
@@ -163,7 +160,7 @@ class pretrainedRunner(baseRunner):
                                ]}
 
         assert self.config.phase is not None
-        assert self.config.split_val is not None
+        assert self.config.split_val is not None, "split_val has to be specified."
         if self.config.ensemble_by not in [None, 'None', 'none']:
             # We do not perform regular IMP
             assert self.config.ensemble_by in ['pruned_seed', 'weight_decay', 'retrain_length', 'retrain_schedule']

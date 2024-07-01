@@ -36,13 +36,11 @@ class ensembleRunner(baseRunner):
         current_phase = self.config.phase  # We are in the same phase
         filterDict['$and'].append({'config.phase': current_phase})
         filterDict['$and'].append({'config.n_splits_total': self.config.n_splits_total})
-        sys.stdout.write(f"Structured pruning: {self.config.prune_structured}.\n")
         if current_phase > 1:
             # We need to specify the previous ensemble method as well
             filterDict['$and'].append({'config.ensemble_method': self.config.ensemble_method})
 
         filterDict['$and'].append({'config.ensemble_by': self.config.ensemble_by})
-        filterDict['$and'].append({'config.prune_structured': self.config.prune_structured})
         entity, project = wandb.run.entity, wandb.run.project
         api = wandb.Api()
         candidate_model_list = []
@@ -262,7 +260,6 @@ class ensembleRunner(baseRunner):
                                {"config.n_phases": self.config.n_phases},
                                {"config.retrain_schedule": self.config.retrain_schedule},
                                {"config.strategy": 'IMP'},
-                               {'config.prune_structured': self.config.prune_structured}
                                ]}
 
         if self.config.learning_rate is not None:

@@ -25,20 +25,13 @@ class Dense:
         self.run_config = kwargs['config']
         self.callbacks = kwargs['callbacks']
         self.goal_sparsity = self.run_config['goal_sparsity']
-        self.prune_structured = self.run_config['prune_structured']
 
         self.optimizer = None  # To be set
         self.n_total_iterations = None
 
     def after_initialization(self):
         """Called after initialization of the strategy"""
-        if self.prune_structured:
-            self.parameters_to_prune = [(module, 'weight') for name, module in self.model.named_modules() if
-                                        hasattr(module, 'weight')
-                                        and not isinstance(module.weight, type(None)) and isinstance(module,
-                                                                                                     torch.nn.Conv2d)]
-        else:
-            self.parameters_to_prune = [(module, 'weight') for name, module in self.model.named_modules() if
+        self.parameters_to_prune = [(module, 'weight') for name, module in self.model.named_modules() if
                                         hasattr(module, 'weight')
                                         and not isinstance(module.weight, type(None)) and not isinstance(module,
                                                                                                          torch.nn.BatchNorm2d)]
@@ -91,23 +84,18 @@ class Dense:
             for module, param_type in self.parameters_to_prune:
                 if (module, param_type) in self.masks:
                     prune.custom_from_mask(module, param_type, self.masks[(module, param_type)])
-        if self.prune_structured:
-            # We prune filters locally
-            sys.stdout.write(f"\nPruning by l2 norm.")
+
+        if self.run_config['pruning_selector'] is not None and self.run_config['pruning_selector'] == 'uniform':
+            # We prune each layer individually
             for module, param_type in self.parameters_to_prune:
-                prune.ln_structured(module, param_type, pruning_sparsity, n=2, dim=0)
+                prune.l1_unstructured(module, name=param_type, amount=pruning_sparsity)
         else:
-            if self.run_config['pruning_selector'] is not None and self.run_config['pruning_selector'] == 'uniform':
-                # We prune each layer individually
-                for module, param_type in self.parameters_to_prune:
-                    prune.l1_unstructured(module, name=param_type, amount=pruning_sparsity)
-            else:
-                # Default: prune globally
-                prune.global_unstructured(
-                    self.parameters_to_prune,
-                    pruning_method=self.get_pruning_method(),
-                    amount=pruning_sparsity,
-                )
+            # Default: prune globally
+            prune.global_unstructured(
+                self.parameters_to_prune,
+                pruning_method=self.get_pruning_method(),
+                amount=pruning_sparsity,
+            )
 
         self.masks = dict()  # Stays empty if we use regular pruning
         if only_save_mask:

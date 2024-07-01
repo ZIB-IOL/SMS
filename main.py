@@ -26,7 +26,7 @@ defaults = dict(
         # System
         run_id=1,
         computer=socket.gethostname(),
-        
+
         # Setup
         dataset='mnist',
         arch='Simple',
@@ -44,22 +44,21 @@ defaults = dict(
         weight_decay=0.0001,
 
         # Sparsifying strategy
-        strategy='IMP',
+        strategy='Dense',
         goal_sparsity=0.9,
         pruning_selector='global',  # must be in ['global', 'uniform', 'random', 'LAMP']
 
         # Retraining
         phase=1,
         n_phases=1,
-        n_epochs_per_phase=2,
+        n_epochs_per_phase=1,
         retrain_schedule='LLR',
-        prune_structured=False,
 
         # Ensemble method
         ensemble_method='UniformEnsembling',
         ensemble_by='pruned_seed',  # ['pruned_seed', 'weight_decay', 'retrain_length', 'retrain_schedule']
         split_val=None,
-        n_splits_total=3,  # The total number of splits we expect to have -> will raise an error if not that number
+        n_splits_total=2,  # The total number of splits we expect to have -> will raise an error if not that number
         bn_recalibration_frac=0.2,
     )
 
