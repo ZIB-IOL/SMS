@@ -19,49 +19,10 @@ from runners.ensembleRunner import ensembleRunner
 from runners.pretrainedRunner import pretrainedRunner
 from runners.scratchRunner import scratchRunner
 
-# Default wandb parameters
-defaults = dict(
-    # System
-    run_id=None,
-    computer=socket.gethostname(),
-    # Setup
-    dataset=None,
-    arch=None,
-    n_epochs=None,
-    batch_size=None,
-    # Efficiency
-    use_amp=True,
-    # Optimizer
-    optimizer=None,
-    learning_rate=None,
-    n_epochs_warmup=None,  # number of epochs to warmup the lr, should be an int
-    momentum=None,
-    weight_decay=None,
-    # Sparsifying strategy
-    strategy=None,
-    goal_sparsity=None,
-    pruning_selector=None,  # must be in ['global', 'uniform', 'random', 'LAMP']
-    # Retraining
-    phase=1,
-    n_phases=None,  # Should be 1, except when using IMP
-    n_epochs_per_phase=None,
-    retrain_schedule=None,
-    extended_imp=None,
-    prune_structured=None,
-    # Ensemble method
-    ensemble_method=None,
-    ensemble_by=None,
-    split_val=None,
-    split_count=None,
-    split_id=None,
-    # The specific split we want to consider, if None, all splits are considered. Otherwise there are n choose k options
-    k_splits_per_ensemble=None,  # The number of splits we want to consider in an ensemble
-    n_splits_total=None,  # The total number of splits we expect to have -> will raise an error if not that number
-    bn_recalibration_frac=None,
-)
+from utilities.utilities import Utilities as Utils
 
-if '--debug' in sys.argv:
-    defaults.update(dict(
+debug = "--debug" in sys.argv
+defaults = dict(
         # System
         run_id=1,
         computer=socket.gethostname(),
@@ -79,7 +40,7 @@ if '--debug' in sys.argv:
         momentum=0.9,
         weight_decay=0.0001,
         # Sparsifying strategy
-        strategy='Ensemble',
+        strategy='Dense',
         goal_sparsity=0.9,
         pruning_selector='global',  # must be in ['global', 'uniform', 'random', 'LAMP']
         # Retraining
@@ -98,7 +59,14 @@ if '--debug' in sys.argv:
         k_splits_per_ensemble=None,  # The number of splits we want to consider in an ensemble
         n_splits_total=3,  # The total number of splits we expect to have -> will raise an error if not that number
         bn_recalibration_frac=0.2,
-    ))
+    )
+
+if not debug:
+    # Set everything to None recursively
+    defaults = Utils.fill_dict_with_none(defaults)
+
+# Add the hostname to the defaults
+defaults['computer'] = socket.gethostname()
 
 # Configure wandb logging
 wandb.init(
@@ -107,6 +75,7 @@ wandb.init(
     entity=None,  # automatically changed in sweep
 )
 config = wandb.config
+config = Utils.update_config_with_default(config, defaults)
 ngpus = torch.cuda.device_count()
 if ngpus > 0:
     config.update(dict(device='cuda:0'))

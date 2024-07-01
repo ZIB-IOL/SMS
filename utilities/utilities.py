@@ -27,6 +27,25 @@ class Utilities:
     """Class of utility functions"""
 
     @staticmethod
+    def fill_dict_with_none(d):
+        for key in d:
+            if isinstance(d[key], dict):
+                Utilities.fill_dict_with_none(d[key])  # Recursive call for nested dictionaries
+            else:
+                d[key] = None
+        return d
+    
+    @staticmethod
+    def update_config_with_default(configDict, defaultDict):
+        """Update config with default values recursively."""
+        for key, default_value in defaultDict.items():
+            if key not in configDict:
+                configDict[key] = default_value
+            elif isinstance(default_value, dict):
+                configDict[key] = Utilities.update_config_with_default(configDict.get(key, {}), default_value)
+        return configDict
+
+    @staticmethod
     @torch.no_grad()
     def get_model_norm_square(model):
         """Get L2 norm squared of parameter vector. This works for a pruned model as well."""
