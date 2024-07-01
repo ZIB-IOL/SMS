@@ -26,37 +26,39 @@ defaults = dict(
         # System
         run_id=1,
         computer=socket.gethostname(),
+        
         # Setup
         dataset='mnist',
         arch='Simple',
         n_epochs=2,
         batch_size=1028,
+
         # Efficiency
         use_amp=True,
+
         # Optimizer
         optimizer='SGD',
         learning_rate='(Linear, 0.1)',
         n_epochs_warmup=None,  # number of epochs to warmup the lr, should be an int
         momentum=0.9,
         weight_decay=0.0001,
+
         # Sparsifying strategy
-        strategy='Dense',
+        strategy='IMP',
         goal_sparsity=0.9,
         pruning_selector='global',  # must be in ['global', 'uniform', 'random', 'LAMP']
+
         # Retraining
         phase=1,
         n_phases=1,
         n_epochs_per_phase=2,
         retrain_schedule='LLR',
-        extended_imp=False,
         prune_structured=False,
+
         # Ensemble method
         ensemble_method='UniformEnsembling',
         ensemble_by='pruned_seed',  # ['pruned_seed', 'weight_decay', 'retrain_length', 'retrain_schedule']
         split_val=None,
-        split_id=None,
-        # The specific split we want to consider, if None, all splits are considered. Otherwise there are n choose k options
-        k_splits_per_ensemble=None,  # The number of splits we want to consider in an ensemble
         n_splits_total=3,  # The total number of splits we expect to have -> will raise an error if not that number
         bn_recalibration_frac=0.2,
     )

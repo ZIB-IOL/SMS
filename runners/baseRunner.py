@@ -684,10 +684,6 @@ class baseRunner:
         if self.config.ensemble_by == 'retrain_length':
             n_epochs_finetune = self.config.split_val
             sys.stdout.write(f"We split by the retrain length. Value {n_epochs_finetune}.\n")
-        elif self.config.extended_imp:
-            n_epochs_finetune = self.config.n_splits_total * n_epochs_finetune
-            sys.stdout.write(
-                f"Extended IMP is enabled. We will retrain {self.config.n_splits_total} times as long: {n_epochs_finetune} epochs.\n")
         n_phases = self.config.n_phases or 1
 
         # Reset the GradScaler for AutoCast

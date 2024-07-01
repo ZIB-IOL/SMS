@@ -29,7 +29,7 @@ class ensembleRunner(baseRunner):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.k_splits_per_ensemble = None
+
 
     def find_multiple_existing_models(self, filterDict):
         """Finds existing wandb runs and downloads the model files."""
@@ -40,9 +40,6 @@ class ensembleRunner(baseRunner):
         if current_phase > 1:
             # We need to specify the previous ensemble method as well
             filterDict['$and'].append({'config.ensemble_method': self.config.ensemble_method})
-            filterDict['$and'].append({
-                'config.split_id': self.config.split_id})  # This restricts us to stay with the same split in every phase, but this is okay
-            filterDict['$and'].append({'config.k_splits_per_ensemble': self.config.k_splits_per_ensemble})
 
         filterDict['$and'].append({'config.ensemble_by': self.config.ensemble_by})
         filterDict['$and'].append({'config.prune_structured': self.config.prune_structured})
@@ -102,19 +99,6 @@ class ensembleRunner(baseRunner):
         sys.stdout.write(f"Trying to find reference pruned models in project: {outputStr}\n")
         assert checkpoint_file is not None, "One of the pruned models has no model file to download, Aborting."
         assert len(candidate_model_list) == self.config.n_splits_total, "Not all pruned models were found, Aborting.\n"
-
-        # Check whether we want to find a specific split-set
-        if self.config.split_id is not None:
-            sorted_split_vals = sorted(
-                [c.id for c in candidate_model_list])  # Sort this to ensure deterministic order of combinations
-            # Generate the set of all possible split combinations
-            splitCombinations = itertools.combinations(sorted_split_vals, self.config.k_splits_per_ensemble)
-            # Pick the combination with the split_id
-            desired_split = list(list(splitCombinations)[self.config.split_id - 1])
-            # Filter the candidate model list
-            candidate_model_list = [c for c in candidate_model_list if c.id in desired_split]
-            sys.stdout.write(
-                f"Desired split: {desired_split} - Reduced the candidate model list to {len(candidate_model_list)} models with split vals {sorted([c.id for c in candidate_model_list])}.\n")
 
         return candidate_model_list
 
@@ -268,15 +252,6 @@ class ensembleRunner(baseRunner):
         assert self.config.ensemble_by in ['pruned_seed', 'weight_decay', 'retrain_length', 'retrain_schedule']
         assert self.config.n_splits_total is not None
         assert self.config.split_val is None
-        assert not (self.config.k_splits_per_ensemble is None) ^ (
-                self.config.split_id is None), "Both should either be None or not None"
-
-        if self.config.k_splits_per_ensemble is not None:
-            # Compute the number of available splits as n choose k
-            n = self.config.n_splits_total
-            k = self.config.k_splits_per_ensemble
-            assert 1 <= self.config.split_id <= math.comb(n,
-                                                          k), f"Split id {self.config.split_id} > {math.comb(n, k)} is not valid, Aborting."
 
         # Find the reference run
         filterDict = {"$and": [{"config.run_id": self.config.run_id},
@@ -287,7 +262,6 @@ class ensembleRunner(baseRunner):
                                {"config.n_phases": self.config.n_phases},
                                {"config.retrain_schedule": self.config.retrain_schedule},
                                {"config.strategy": 'IMP'},
-                               {"config.extended_imp": self.config.extended_imp},
                                {'config.prune_structured': self.config.prune_structured}
                                ]}
 

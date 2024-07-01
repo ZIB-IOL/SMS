@@ -43,12 +43,8 @@ class pretrainedRunner(baseRunner):
                 f"Specified ensemble_method {self.config.ensemble_method}, ensemble_by {self.config.ensemble_by}, split_val {self.config.split_val}.\n")
             filterDict['$and'].append({'config.ensemble_by': self.config.ensemble_by})
             if self.config.ensemble_method not in [None, 'None', 'none']:
-                sys.stdout.write(
-                    f"Looking for last ensembled model with split_id {self.config.split_id} and k_splits_per_ensemble {self.config.k_splits_per_ensemble}\n")
                 filterDict['$and'].append({'config.strategy': 'Ensemble'})
                 filterDict['$and'].append({'config.ensemble_method': self.config.ensemble_method})
-                filterDict['$and'].append({'config.split_id': self.config.split_id})
-                filterDict['$and'].append({'config.k_splits_per_ensemble': self.config.k_splits_per_ensemble})
                 filterDict['$and'].append({'config.prune_structured': self.config.prune_structured})
 
                 # We now also need to filter for n_splits_total since otherwise we use different settings
@@ -61,8 +57,6 @@ class pretrainedRunner(baseRunner):
                 filterDict['$and'].append({'config.strategy': 'IMP'})
                 filterDict['$and'].append({'config.split_val': self.config.split_val})
                 filterDict['$and'].append({'config.prune_structured': self.config.prune_structured})
-                if self.config.extended_imp:
-                    filterDict['$and'].append({'config.n_splits_total': self.config.n_splits_total})
         else:
             assert self.config.n_splits_total is not None
             filterDict['$and'].append({'config.strategy': 'Dense'})
@@ -182,9 +176,6 @@ class pretrainedRunner(baseRunner):
             warnings.warn(
                 "You specified n_epochs for retraining. Note that this only controls the selection of the pretrained model.")
             filterDict["$and"].append({"config.n_epochs": self.config.n_epochs})
-
-        if self.config.extended_imp:
-            assert self.config.n_splits_total is not None, "You have to specify the total number of splits for extended IMP."
 
         self.checkpoint_file, self.seed, self.reference_run = self.find_existing_model(filterDict=filterDict)
         wandb.config.update({'seed': self.seed})  # Push the seed to wandb
